@@ -1,18 +1,593 @@
-*:not(i){
-  font-family:sans-serif;
+/* =============================================================
+   TOKENS
+   ============================================================= */
+:root {
+  --color-paper: #FAF8F3;       /* page background */
+  --color-surface: #FFFFFF;     /* modal background */
+  --color-ink: #24262B;         /* primary text */
+  --color-ink-soft: #6B6F76;    /* secondary text */
+  --color-line: #E4E1D8;        /* border lines, two weights */
+  --color-line-strong: #CFCBBD;
+
+  --color-accent: #2C4A6E;      /* brand/interactive color */
+  --color-accent-soft: #E7EEF5; /* pale tint version. for hover backgrounds */
+  --color-today: #C1542E;       /* highlight color for today */
+
+  /* Busyness gradient endpoints. --busyness (0-1) is set per day-cell
+     inline; the background is mixed between these two colors. Tweak
+     these two values to change the whole gradient in one place. */
+  --busy-color-empty: #FFFFFF;
+  --busy-color-full: #2C4A6E;
+
+  /* Priority colors */
+  --priority-low: #5E8C5A;
+  --priority-medium: #C79A2E;
+  --priority-high: #C1712E;
+  --priority-urgent: #B23A2E;
+
+  /* font-display is for specific text, like name of months */
+  /*--font-display: "Fraunces", Georgia, serif;*/ 
+  /* font-ui is the default font for the page */
+  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-modal: 0 20px 60px rgba(30, 30, 20, 0.25);
 }
 
-#createNewTask {
-  position: fixed;
-  top: 50px;
-  left: 25px;
+/* color scheme for dark mode */
+/*@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #1B1C1E;
+    --color-surface: #232427;
+    --color-ink: #EDEBE4;
+    --color-ink-soft: #9A9C9F;
+    --color-line: #34363A;
+    --color-line-strong: #45474C;
+    --color-accent: #7EA6D6;
+    --color-accent-soft: #26344A;
+    --busy-color-empty: #232427;
+    --busy-color-full: #7EA6D6;
+  }
+}*/
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
 }
 
-/*Task view window*/
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
 
-#taskViewWindow {
-  background-color: red;
+h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); font-weight: 600; }
+
+/* =============================================================
+   BUTTONS
+   ============================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 85%, black); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--color-line-strong);
+  color: var(--color-ink);
+}
+.btn-ghost:hover { background: var(--color-accent-soft); }
+
+.btn-new-task {
+  margin-left: 8px;
+  margin-top: 8px;
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-soft);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); }
+.icon-btn-danger:hover { background: color-mix(in srgb, var(--priority-urgent) 15%, transparent); color: var(--priority-urgent); }
+
+.icon-plus { font-size: 1rem; line-height: 1; }
+
+/* =============================================================
+   HEADER
+   ============================================================= */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface);
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-title {
+  font-size: 2rem;
+  color: var(--color-ink);
+}
+
+.current-period {
+  font-size: 1.30rem;
+  min-width: 190px;
+  text-align: center;
+}
+
+.view-switch {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+}
+
+.view-switch-btn {
+  border: none;
+  background: transparent;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.view-switch-btn.is-active {
+  background: var(--color-accent);
+  color: #fff;
+}
+/* =============================================================
+   BODY
+   ============================================================= */
+.app-shell {
+  display: flex;
+}
+
+/*---------- Side bar ----------*/
+
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;   /* stops it from shrinking under pressure */
+}
+
+/* ---------- Calendar / view switching ---------- */
+.calendar-body {
+  flex: 1;
+  min-width: 0;      /* lets the calendar shrink/scroll instead of overflowing */
+  padding: 20px 24px 40px;
+}
+
+.calendar-view[hidden] { display: none; }
+
+/* ---------- Month view ---------- */
+.month-weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 1px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-soft);
+  text-align: center;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.day-cell {
+  position: relative;
+  min-height: 108px;
+  padding: 8px;
+  background: color-mix(in srgb, var(--busy-color-full) calc(var(--busyness, 0) * 100%), var(--busy-color-empty));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.day-cell.is-outside-month { opacity: 0.45; }
+
+.day-number {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* Give the day number readable contrast once the busy fill gets dark */
+.day-cell[style*="--busyness:0.7"] .day-number,
+.day-cell[style*="--busyness:0.8"] .day-number,
+.day-cell[style*="--busyness:0.85"] .day-number,
+.day-cell[style*="--busyness:0.9"] .day-number,
+.day-cell[style*="--busyness:1"] .day-number { color: #fff; }
+
+.day-cell.is-today .day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-today);
+  color: #fff !important;
+}
+
+.event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.event-chip {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border-left: 3px solid var(--priority-color, var(--color-accent));
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.event-chip:hover { filter: brightness(0.96); }
+
+/* ---------- Week / Day time-grid views ---------- */
+.week-header {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 4px;
+}
+
+.week-header-day {
+  text-align: center;
+  padding: 6px 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.week-day-name { font-size: 0.72rem; color: var(--color-ink-soft); font-weight: 600; }
+.week-day-num { font-size: 1rem; font-weight: 600; }
+.week-header-day.is-today .week-day-num {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-today);
+  color: #fff;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  border-top: 1px solid var(--color-line);
+}
+
+.time-grid-single { grid-template-columns: 56px 1fr; }
+
+.time-gutter {
+  display: grid;
+  grid-template-rows: repeat(14, 56px);
+}
+
+.hour-label {
+  grid-row: var(--row);
+  font-size: 0.7rem;
+  color: var(--color-ink-soft);
+  transform: translateY(-7px);
+  text-align: right;
+  padding-right: 8px;
+}
+
+.day-column {
+  position: relative;
+  border-left: 1px solid var(--color-line);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--color-line) 0,
+    var(--color-line) 1px,
+    transparent 1px,
+    transparent 56px
+  );
+  min-height: calc(14 * 56px);
+}
+
+.day-column.is-today { background-color: var(--color-accent-soft); }
+
+.time-block {
   position: absolute;
-  top: 100px;
-  left: 300px;
+  left: 4px;
+  right: 4px;
+  top: calc((var(--row-start, 1) - 1) * 28px);
+  height: calc(var(--row-span, 1) * 28px - 2px);
+  background: var(--color-surface);
+  border-left: 3px solid var(--priority-color, var(--color-accent));
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.time-block-title { font-size: 0.78rem; font-weight: 600; }
+.time-block-time { font-size: 0.68rem; color: var(--color-ink-soft); }
+
+.day-view-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 4px;
+}
+.day-view-weekday { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; }
+.day-view-date { color: var(--color-ink-soft); font-size: 0.9rem; }
+
+/* =============================================================
+   MODALS (shared)
+   ============================================================= */
+
+dialog {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 18px;
+  padding-top: 6px;
+  padding-right: 8px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+dialog::backdrop {
+  background: rgba(20, 20, 15, 0.4);
+}
+dialog:focus-visible {
+  outline: none;
+}
+
+.modal-topbar { 
+  display: flex; 
+  justify-content: flex-end; 
+  margin-bottom: 8px; 
+}
+.modal-close {
+  position: static;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+.modal-close:hover { background: var(--color-accent-soft); }
+
+.modal-close:focus {
+  outline: none;
+}
+.modal-close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid var(--color-line);
+  margin: 18px 0;
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+/* ---------- 4. Task view window ---------- */
+.task-view-modal { width: min(420px, 100%); }
+
+.task-view-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.task-view-actions { display: flex; gap: 2px; }
+
+.task-view-title { font-size: 1.1rem; margin-top: 6px; }
+.task-view-schedule { margin: 4px 0 0; color: var(--color-ink-soft); font-size: 0.85rem; }
+.task-view-description { margin: 6px 0 0; font-size: 0.88rem; line-height: 1.5; color: var(--color-ink); }
+
+.task-view-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.priority-chip[data-priority="low"] { color: var(--priority-low); background: color-mix(in srgb, var(--priority-low) 15%, transparent); }
+.priority-chip[data-priority="medium"] { color: var(--priority-medium); background: color-mix(in srgb, var(--priority-medium) 18%, transparent); }
+.priority-chip[data-priority="high"] { color: var(--priority-high); background: color-mix(in srgb, var(--priority-high) 18%, transparent); }
+.priority-chip[data-priority="urgent"] { color: var(--priority-urgent); background: color-mix(in srgb, var(--priority-urgent) 18%, transparent); }
+
+/* ---------- 5. Task edit window ---------- */
+.task-edit-modal { width: min(620px, 100%); max-height: 88vh; overflow-y: auto; }
+
+.modal-header { margin-bottom: 18px; padding-right: 24px; }
+.modal-title { font-size: 1.25rem; margin-bottom: 12px; }
+
+.edit-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+}
+
+.edit-tab-btn {
+  border: none;
+  background: transparent;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+.edit-tab-btn.is-active { background: var(--color-accent); color: #fff; }
+
+.edit-panel[hidden] { display: none; }
+
+.edit-fieldset { border: none; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+
+.field-label { font-size: 0.78rem; font-weight: 600; color: var(--color-ink-soft); }
+
+.field input[type="text"],
+.field input[type="date"],
+.field input[type="time"],
+.field select,
+.field textarea {
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.field textarea { resize: vertical; }
+
+.field-row { display: flex; gap: 12px; }
+
+.field-group { border: none; padding: 0; margin: 0 0 14px; }
+
+.schedule-fieldset {}
+.schedule-group { display: flex; gap: 5px}
+
+.priority-fieldset {}
+.priority-fieldset legend { padding: 0; margin-bottom: 6px; }
+
+.priority-options { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.priority-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.priority-option .priority-dot { background: currentColor; }
+.priority-option[data-priority="low"] { color: var(--priority-low); }
+.priority-option[data-priority="medium"] { color: var(--priority-medium); }
+.priority-option[data-priority="high"] { color: var(--priority-high); }
+.priority-option[data-priority="urgent"] { color: var(--priority-urgent); }
+.priority-option:has(input:checked) {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  border-color: currentColor;
+}
+.priority-option input { accent-color: currentColor; }
+
+.edit-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 720px) {
+  .app-header { padding: 12px 14px; }
+  .header-left, .header-center, .header-right { gap: 8px; }
+  .app-title { display: none; }
+  .current-period { min-width: 0; font-size: 1rem; }
+  .btn-new-task span:last-child { display: none; }
+  .calendar-body { padding: 14px; }
+  .day-cell { min-height: 76px; padding: 5px; }
+  .event-chip { font-size: 0.65rem; }
 }

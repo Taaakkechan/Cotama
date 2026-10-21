@@ -1,32 +1,21 @@
-Schedule 
-	- scheduling irregular repeats
-	- schedule start and end of repeat
-	- validness of task
-		- dependancy time checking
-		- include current time to the equation
-	- include priority when scheduling
+Code structure reference (Claude)
 
-Date
+src/
+  types.ts              # Task, TaskInstance, Priority, RecurrenceRule
+  store.ts              # in-memory state + CRUD + change notification
+  dates.ts              # pure date math: getMonthGrid, getWeekDays, addDays...
+  recurrence.ts         # expand a RecurrenceRule into concrete instances
+  busyness.ts           # calculateBusyness(date, instances) -> 0-1
 
-TaskHandling
-	- include Task Dependancies
+  render/
+    month-view.ts
+    week-view.ts
+    day-view.ts
+    dom-helpers.ts       # small createElement-style utilities
 
-- publish web browser
-- create UI (Input/output)
-- create save (local storage for now)
+  ui/
+    view-switcher.ts
+    task-view-modal.ts
+    task-edit-modal.ts   # the mode/fieldset logic we've been discussing
 
-- refactor code
-
-- add log and duration tracking
-
-2026-03-29
-
-- refactor code so client.ts isn't so crowded
-- add storage (localstorage)
-- make logic work with minimal html
-- make visuals cleaner
-- add calender
-- make task templates?
-
-ui
-	-when adding components, lock duration so it equals the sum of component duration.
+  main.ts                # wires it all up, initial render, top-level listeners

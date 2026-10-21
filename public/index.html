@@ -1,14 +1,20 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <!-- Without this '×' may not be rendered correctly //-->
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <!-- <link href="https://fonts.googleapis.com/css?family=VT323&display=swap" rel="stylesheet"> //-->
-    <title>KOTAMA</title>
-    <meta property='og:title' content='KOTAMA'/>
-    <meta property='og:description' content='My ideal task manager'>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cotama</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!--  This controls how the message is displayed on Social Media-->
+    <meta property='og:title' content='Cotama'/>
+    <meta property='og:description' content='It is a Calendar'>
     <meta property='og:type' content='website'/>
 </head>
-<body>
+
+<body data-view="month">
 <div>
     <script>
         window.version = '0.3.83';
@@ -21,76 +27,455 @@
         mainStyles.href = `styles.css?v=${version}`;
         document.head.append(mainStyles);
     </script>
-<!-- game -->
-<div id="main">
 
-    <button id="createNewTask">+ Create</button>
+  <!-- =========================================================
+       1. HEADER
+       ========================================================= -->
+  <header class="app-header">
 
-    <!-- task view window -->
-    <div id="taskViewWindow">
-        <div id="viewBaseTask">
-            <div class="editingOptions">
-                <button id="createNewInstance">+I</button>
-                <button id="editBaseTask">E</button>
-                <button id="deleteTask">D</button>
-            </div>
-            <div id="baseTaskContents">
-                <div id="baseTaskContents-title">title</div>
-                <div id="baseTaskContents-description">blah-blah</div>
-                <div id="baseTaskContents-priority">100</div>
-                <div id="baseTaskContents-duration">500years</div>
-            </div>
+    <div class="header-left">
+      <h1 class="app-title">Cotama</h1>
+    </div>
+
+    <div class="header-center">
+      <button type="button" class="icon-btn" id="prev-period" aria-label="Previous period">
+        <span aria-hidden="true">&#8249;</span>
+      </button>
+      <h2 class="current-period" id="current-period">September 2026</h2>
+      <button type="button" class="icon-btn" id="next-period" aria-label="Next period">
+        <span aria-hidden="true">&#8250;</span>
+      </button>
+      <button type="button" class="btn btn-ghost btn-today" id="today-btn">Today</button>
+    </div>
+
+    <div class="header-right">
+      <!-- View switcher: Monthly / Weekly / Daily -->
+      <div class="view-switch" role="tablist" aria-label="Calendar view">
+        <button type="button" class="view-switch-btn is-active" data-view-btn="month" role="tab" aria-selected="true">Month</button>
+        <button type="button" class="view-switch-btn" data-view-btn="week" role="tab" aria-selected="false">Week</button>
+        <button type="button" class="view-switch-btn" data-view-btn="day" role="tab" aria-selected="false">Day</button>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- =========================================================
+       2. BODY (SIDEBAR / CALENDAR)
+       ========================================================= -->
+  <div class="app-shell">
+
+    <!-- SIDEBAR (contains new button, filter, and mini-calendar) -->
+    <aside class="sidebar">
+        <!-- 3. NEW TASK BUTTON (placed top-left, Google Calendar style) -->
+      <button type="button" class="btn btn-primary btn-new-task" id="new-task-btn">
+        <span class="icon-plus" aria-hidden="true">+</span>
+        New task
+      </button>
+
+      <section class="sidebar-filters" aria-label="Filters">
+        <!-- checkboxes/toggles for task types, calendars, etc. -->
+      </section>
+
+      <section class="mini-calendar" aria-label="Mini calendar" data-visible-when="week day">
+        <!-- small month grid, only shown outside month view -->
+      </section>
+    </aside>
+
+    <!-- MAIN CALENDAR -->
+    <main class="calendar-body">
+
+      <!-- ---------- MONTH VIEW ---------- -->
+      <section class="calendar-view" data-view-panel="month" aria-label="Month view">
+
+        <div class="month-weekday-row">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
         </div>
-        <div id="viewInstance">
-            <div class="editingOptions">
-                <button id="editInstance">E</button>
-                <button id="deleteInstance">D</button>
-            </div>
+
+        <div class="month-grid">
+          <!--
+            Each day cell reads its busyness level from the CSS custom
+            property --busyness (a value from 0 to 1). Swap the inline
+            style for whatever your TS logic computes per day.
+            Add/remove `.is-outside-month` and `.is-today` as needed.
+          -->
+
+          <!-- Week 1 -->
+          <div class="day-cell is-outside-month" style="--busyness:0.1;" data-date="2026-08-30">
+            <span class="day-number">30</span>
+          </div>
+          <div class="day-cell is-outside-month" style="--busyness:0.3;" data-date="2026-08-31">
+            <span class="day-number">31</span>
+          </div>
+          <div class="day-cell" style="--busyness:0.6;" data-date="2026-09-01">
+            <span class="day-number">1</span>
+            <ul class="event-list">
+              <li class="event-chip"
+                  data-task-id="task-1" data-instance-id="inst-1"
+                  data-instance-title="Team standup"
+                  data-instance-time="Tue, Sep 1 &middot; 9:00 &ndash; 9:15 AM"
+                  data-base-title="Team standup"
+                  data-base-description="Daily sync with the product team."
+                  data-base-duration="15 min"
+                  data-base-priority="medium"
+                  style="--priority-color: var(--priority-medium);">Team standup</li>
+            </ul>
+          </div>
+          <div class="day-cell" style="--busyness:0.2;" data-date="2026-09-02">
+            <span class="day-number">2</span>
+          </div>
+          <div class="day-cell" style="--busyness:0.4;" data-date="2026-09-03">
+            <span class="day-number">3</span>
+          </div>
+          <div class="day-cell" style="--busyness:0.85;" data-date="2026-09-04">
+            <span class="day-number">4</span>
+            <ul class="event-list">
+              <li class="event-chip"
+                  data-task-id="task-2" data-instance-id="inst-2"
+                  data-instance-title="Quarterly review"
+                  data-instance-time="Fri, Sep 4 &middot; 1:00 &ndash; 3:00 PM"
+                  data-base-title="Quarterly review"
+                  data-base-description="Present Q3 numbers to leadership."
+                  data-base-duration="2 hr"
+                  data-base-priority="urgent"
+                  style="--priority-color: var(--priority-urgent);">Quarterly review</li>
+              <li class="event-chip"
+                  data-task-id="task-3" data-instance-id="inst-3"
+                  data-instance-title="Dentist"
+                  data-instance-time="Fri, Sep 4 &middot; 4:30 PM"
+                  data-base-title="Dentist appointment"
+                  data-base-description="Routine cleaning."
+                  data-base-duration="45 min"
+                  data-base-priority="low"
+                  style="--priority-color: var(--priority-low);">Dentist</li>
+            </ul>
+          </div>
+          <div class="day-cell" style="--busyness:0;" data-date="2026-09-05">
+            <span class="day-number">5</span>
+          </div>
+
+          <!-- Week 2 -->
+          <div class="day-cell" style="--busyness:0;" data-date="2026-09-06"><span class="day-number">6</span></div>
+          <div class="day-cell" style="--busyness:0.5;" data-date="2026-09-07"><span class="day-number">7</span></div>
+          <div class="day-cell" style="--busyness:0.3;" data-date="2026-09-08"><span class="day-number">8</span></div>
+          <div class="day-cell" style="--busyness:0.7;" data-date="2026-09-09"><span class="day-number">9</span></div>
+          <div class="day-cell" style="--busyness:0.2;" data-date="2026-09-10"><span class="day-number">10</span></div>
+          <div class="day-cell" style="--busyness:0.4;" data-date="2026-09-11"><span class="day-number">11</span></div>
+          <div class="day-cell" style="--busyness:0.1;" data-date="2026-09-12"><span class="day-number">12</span></div>
+
+          <!-- Week 3 (contains "today") -->
+          <div class="day-cell" style="--busyness:0;" data-date="2026-09-13"><span class="day-number">13</span></div>
+          <div class="day-cell" style="--busyness:0.6;" data-date="2026-09-14"><span class="day-number">14</span></div>
+          <div class="day-cell is-today" style="--busyness:0.75;" data-date="2026-09-15">
+            <span class="day-number">15</span>
+            <ul class="event-list">
+              <li class="event-chip"
+                  data-task-id="task-4" data-instance-id="inst-4"
+                  data-instance-title="Design review"
+                  data-instance-time="Tue, Sep 15 &middot; 11:00 AM &ndash; 12:00 PM"
+                  data-base-title="Design review"
+                  data-base-description="Walk through the new calendar app mockups."
+                  data-base-duration="1 hr"
+                  data-base-priority="high"
+                  style="--priority-color: var(--priority-high);">Design review</li>
+            </ul>
+          </div>
+          <div class="day-cell" style="--busyness:0.3;" data-date="2026-09-16"><span class="day-number">16</span></div>
+          <div class="day-cell" style="--busyness:0.5;" data-date="2026-09-17"><span class="day-number">17</span></div>
+          <div class="day-cell" style="--busyness:0.2;" data-date="2026-09-18"><span class="day-number">18</span></div>
+          <div class="day-cell" style="--busyness:0;" data-date="2026-09-19"><span class="day-number">19</span></div>
+
+          <!-- Week 4 -->
+          <div class="day-cell" style="--busyness:0;" data-date="2026-09-20"><span class="day-number">20</span></div>
+          <div class="day-cell" style="--busyness:0.4;" data-date="2026-09-21"><span class="day-number">21</span></div>
+          <div class="day-cell" style="--busyness:0.65;" data-date="2026-09-22"><span class="day-number">22</span></div>
+          <div class="day-cell" style="--busyness:0.3;" data-date="2026-09-23"><span class="day-number">23</span></div>
+          <div class="day-cell" style="--busyness:1;" data-date="2026-09-24">
+            <span class="day-number">24</span>
+            <ul class="event-list">
+              <li class="event-chip"
+                  data-task-id="task-5" data-instance-id="inst-5"
+                  data-instance-title="Launch day"
+                  data-instance-time="Thu, Sep 24 &middot; All day"
+                  data-base-title="Launch day"
+                  data-base-description="Ship the v1 release."
+                  data-base-duration="All day"
+                  data-base-priority="urgent"
+                  style="--priority-color: var(--priority-urgent);">Launch day</li>
+            </ul>
+          </div>
+          <div class="day-cell" style="--busyness:0.5;" data-date="2026-09-25"><span class="day-number">25</span></div>
+          <div class="day-cell" style="--busyness:0.2;" data-date="2026-09-26"><span class="day-number">26</span></div>
+
+          <!-- Week 5 -->
+          <div class="day-cell" style="--busyness:0;" data-date="2026-09-27"><span class="day-number">27</span></div>
+          <div class="day-cell" style="--busyness:0.3;" data-date="2026-09-28"><span class="day-number">28</span></div>
+          <div class="day-cell" style="--busyness:0.4;" data-date="2026-09-29"><span class="day-number">29</span></div>
+          <div class="day-cell" style="--busyness:0.2;" data-date="2026-09-30"><span class="day-number">30</span></div>
+          <div class="day-cell is-outside-month" style="--busyness:0.1;" data-date="2026-10-01"><span class="day-number">1</span></div>
+          <div class="day-cell is-outside-month" style="--busyness:0;" data-date="2026-10-02"><span class="day-number">2</span></div>
+          <div class="day-cell is-outside-month" style="--busyness:0;" data-date="2026-10-03"><span class="day-number">3</span></div>
         </div>
-    </div>
+      </section>
 
-    <!-- task edit window -->
-    <div id="taskEditWindow" style="background-color: lightgrey; display: block; z-index: 1;">
-        
-        <!-- save / cancel -->
-        <button id="taskEditWindow-cancelEdit" class="alterDataBase"> cancel </button>
-        <button id="taskEditWindow-saveEdit" class="alterDataBase"> save </button>
-
-        <!-- is done / title / event? -->
-        <div><input id="taskEditWindow-isTaskDone" type="checkBox">
-            <input id="taskEditWindow-taskTitle">
-            <input id="taskEditWindow-isEvent" type="checkBox">event</div>
-
-        <!-- schedule  -->
-        <div id="taskEditWindow-schedule">
-            <input id="taskEditWindow-start" type="dateTime-local"> to <input id="taskEditWindow-due" type="dateTime-local">
-            <input id="taskEditWindow-isRepeating" type="checkBox"> Repeat 
-            <div id="taskEditWindow-repeat">
-                <div id="taskEditWindow-repeatForm" style="display: none;">
-                    Frequency: <input id="taskEditWindow-repeatFreq" type="number" min="1"> days <br>
-                    <input id="taskEditWindow-isRepeatEnd" type="checkBox">repeatEnd: <input id="taskEditWindow-repeatEndDate" type="date">
-                </div>
-            </div>
-            <div><input id="taskEditWindow-duration" type="number"> min</div>
+      <!-- ---------- WEEK VIEW ---------- -->
+      <section class="calendar-view" data-view-panel="week" hidden aria-label="Week view">
+        <div class="week-header">
+          <div class="week-header-gutter"></div>
+          <div class="week-header-day"><span class="week-day-name">Sun</span><span class="week-day-num">13</span></div>
+          <div class="week-header-day"><span class="week-day-name">Mon</span><span class="week-day-num">14</span></div>
+          <div class="week-header-day is-today"><span class="week-day-name">Tue</span><span class="week-day-num">15</span></div>
+          <div class="week-header-day"><span class="week-day-name">Wed</span><span class="week-day-num">16</span></div>
+          <div class="week-header-day"><span class="week-day-name">Thu</span><span class="week-day-num">17</span></div>
+          <div class="week-header-day"><span class="week-day-name">Fri</span><span class="week-day-num">18</span></div>
+          <div class="week-header-day"><span class="week-day-name">Sat</span><span class="week-day-num">19</span></div>
         </div>
-         
-        <div>priority: <input id="taskEditWindow-priority" type="number"></div>
-        <div><input id="taskEditWindow-description"></div>
-        
 
-        <!-- delete -->
-        <button id="taskEditWindow-deleteTask"> delete</button>
-        
-        
+        <div class="time-grid" id="week-time-grid">
+          <!--
+            Hour labels + 7 day columns. Rows are generated below for
+            7:00 to 20:00. Position event blocks with the
+            --row-start / --row-span custom properties: row-start is
+            (hour - 7) * 2 + 2 (row 1 is the header), row-span is the
+            duration in half-hour increments.
+          -->
+          <div class="time-gutter">
+            <div class="hour-label" style="--row:1;">7 AM</div>
+            <div class="hour-label" style="--row:2;">8 AM</div>
+            <div class="hour-label" style="--row:3;">9 AM</div>
+            <div class="hour-label" style="--row:4;">10 AM</div>
+            <div class="hour-label" style="--row:5;">11 AM</div>
+            <div class="hour-label" style="--row:6;">12 PM</div>
+            <div class="hour-label" style="--row:7;">1 PM</div>
+            <div class="hour-label" style="--row:8;">2 PM</div>
+            <div class="hour-label" style="--row:9;">3 PM</div>
+            <div class="hour-label" style="--row:10;">4 PM</div>
+            <div class="hour-label" style="--row:11;">5 PM</div>
+            <div class="hour-label" style="--row:12;">6 PM</div>
+            <div class="hour-label" style="--row:13;">7 PM</div>
+            <div class="hour-label" style="--row:14;">8 PM</div>
+          </div>
+
+          <div class="day-column" data-date="2026-09-13"></div>
+          <div class="day-column" data-date="2026-09-14"></div>
+          <div class="day-column is-today" data-date="2026-09-15">
+            <div class="time-block event-chip"
+                 style="--row-start:5; --row-span:2; --priority-color: var(--priority-high);"
+                 data-task-id="task-4" data-instance-id="inst-4"
+                 data-instance-title="Design review"
+                 data-instance-time="Tue, Sep 15 &middot; 11:00 AM &ndash; 12:00 PM"
+                 data-base-title="Design review"
+                 data-base-description="Walk through the new calendar app mockups."
+                 data-base-duration="1 hr"
+                 data-base-priority="high">
+              <span class="time-block-title">Design review</span>
+              <span class="time-block-time">11:00 &ndash; 12:00</span>
+            </div>
+          </div>
+          <div class="day-column" data-date="2026-09-16"></div>
+          <div class="day-column" data-date="2026-09-17"></div>
+          <div class="day-column" data-date="2026-09-18"></div>
+          <div class="day-column" data-date="2026-09-19"></div>
+        </div>
+      </section>
+
+      <!-- ---------- DAY VIEW ---------- -->
+      <section class="calendar-view" data-view-panel="day" hidden aria-label="Day view">
+        <div class="day-view-header">
+          <span class="day-view-weekday">Tuesday</span>
+          <span class="day-view-date">September 15, 2026</span>
+        </div>
+
+        <div class="time-grid time-grid-single" id="day-time-grid">
+          <div class="time-gutter">
+            <div class="hour-label" style="--row:1;">7 AM</div>
+            <div class="hour-label" style="--row:2;">8 AM</div>
+            <div class="hour-label" style="--row:3;">9 AM</div>
+            <div class="hour-label" style="--row:4;">10 AM</div>
+            <div class="hour-label" style="--row:5;">11 AM</div>
+            <div class="hour-label" style="--row:6;">12 PM</div>
+            <div class="hour-label" style="--row:7;">1 PM</div>
+            <div class="hour-label" style="--row:8;">2 PM</div>
+            <div class="hour-label" style="--row:9;">3 PM</div>
+            <div class="hour-label" style="--row:10;">4 PM</div>
+            <div class="hour-label" style="--row:11;">5 PM</div>
+            <div class="hour-label" style="--row:12;">6 PM</div>
+            <div class="hour-label" style="--row:13;">7 PM</div>
+            <div class="hour-label" style="--row:14;">8 PM</div>
+          </div>
+
+          <div class="day-column">
+            <div class="time-block event-chip"
+                 style="--row-start:5; --row-span:2; --priority-color: var(--priority-high);"
+                 data-task-id="task-4" data-instance-id="inst-4"
+                 data-instance-title="Design review"
+                 data-instance-time="Tue, Sep 15 &middot; 11:00 AM &ndash; 12:00 PM"
+                 data-base-title="Design review"
+                 data-base-description="Walk through the new calendar app mockups."
+                 data-base-duration="1 hr"
+                 data-base-priority="high">
+              <span class="time-block-title">Design review</span>
+              <span class="time-block-time">11:00 &ndash; 12:00</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <!-- =========================================================
+       4. TASK VIEW WINDOW (modal shown on top of the calendar)
+       ========================================================= -->
+  <dialog class="task-view-modal" id="task-view-dialog" tabindex="-1" aria-labelledby="view-instance-title">
+    <div class="modal-topbar">
+      <button type="button" class="modal-close" data-close-dialog aria-label="Close">&times;</button>
     </div>
-    <div style="position: absolute; left: 10; top: 400; z-index: 0;">
-        TaskDataBase  <div id="dataBase" style=" float: right"></div>
+    
+    <!-- Base task part -->
+    <section class="task-view-section" data-part="base-task">
+      <div class="task-view-section-header">
+        <span class="eyebrow">Task</span>
+        <div class="task-view-actions">
+          <button type="button" class="icon-btn" data-action="new-instance" aria-label="New occurrence">&#43;</button>
+          <button type="button" class="icon-btn" data-action="edit-base-task" aria-label="Edit task">&#9998;</button>
+          <button type="button" class="icon-btn icon-btn-danger" data-action="delete-base-task" aria-label="Delete task">&#128465;</button>
+        </div>
+      </div>
+      <h4 class="task-view-title" id="view-base-title">Design review</h4>
+      <p class="task-view-description" id="view-base-description">Walk through the new calendar app mockups.</p>
+      <div class="task-view-meta">
+        <span class="meta-chip" id="view-base-duration">1 hr</span>
+        <span class="meta-chip priority-chip" id="view-base-priority" data-priority="high">
+          <span class="priority-dot" aria-hidden="true"></span>High
+        </span>
+      </div>
+    </section>
+
+    <hr class="modal-divider" />
+
+    <!-- Instance part -->
+    <section class="task-view-section" data-part="instance">
+      <div class="task-view-section-header">
+        <span class="eyebrow">Instance</span>
+        <div class="task-view-actions">
+          <button type="button" class="icon-btn" data-action="edit-instance" aria-label="Edit occurrence">&#9998;</button>
+          <button type="button" class="icon-btn icon-btn-danger" data-action="delete-instance" aria-label="Delete occurrence">&#128465;</button>
+        </div>
+      </div>
+      <h3 class="task-view-title" id="view-instance-title">Design review</h3>
+      <p class="task-view-schedule" id="view-instance-schedule">Tue, Sep 15 &middot; 11:00 AM &ndash; 12:00 PM</p>
+    </section>
+  </dialog>
+
+  <!-- =========================================================
+       5. TASK EDIT WINDOW (bigger modal)
+       ========================================================= -->
+  <dialog class="task-edit-modal" id="task-edit-dialog" tabindex="-1" aria-labelledby="edit-modal-title">
+
+    <div class="modal-topbar">
+      <button type="button" class="modal-close" data-close-dialog aria-label="Close">&times;</button>
     </div>
-    <div style="position: absolute; left: 10; top: 450; z-index: 0;">
-        Scheduled  <div id="schedule" style=" float: right"></div>
+
+    <div class="modal-header">
+      <h3 class="modal-title" id="edit-modal-title">Edit task</h3>
+      <div class="edit-tabs" role="tablist">
+        <button type="button" class="edit-tab-btn is-active" data-item-type="task" role="tab">Task</button>
+        <button type="button" class="edit-tab-btn" data-item-type="event" role="tab">Event</button>
+      </div>
     </div>
-</div>
+
+    
+    <form class="edit-panel" id="task-edit-form" data-mode="new-task">
+
+      <!-- Base Task Portion -->
+
+      <fieldset class="edit-fieldset" data-edit-panel="base-task">
+        <!-- event value hidden input (toggle is visible)-->
+        <input type="hidden" name="item-type" value="event">
+        <!-- Title input -->
+        <label class="field">
+          <span class="field-label">Title</span>
+          <input type="text" name="base-title" value="Design review" />
+        </label>
+        <!-- Description input -->
+        <label class="field">
+          <span class="field-label">Description</span>
+          <textarea name="base-description" rows="3">Walk through the new calendar app mockups.</textarea>
+        </label>
+        <!-- Duration input -->
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Duration</span>
+            <input type="text" name="base-duration" value="1 hr" placeholder="e.g. 1 hr 30 min" />
+          </label>
+        </div>
+        <!-- Priority Input -->
+        <fieldset class="field field-group priority-fieldset">
+          <legend class="field-label">Priority</legend>
+          <div class="priority-options">
+            <label class="priority-option" data-priority="low">
+              <input type="radio" name="base-priority" value="low" />
+              <span class="priority-dot" aria-hidden="true"></span>Low
+            </label>
+            <label class="priority-option" data-priority="medium">
+              <input type="radio" name="base-priority" value="medium" />
+              <span class="priority-dot" aria-hidden="true"></span>Medium
+            </label>
+            <label class="priority-option" data-priority="high">
+              <input type="radio" name="base-priority" value="high" checked />
+              <span class="priority-dot" aria-hidden="true"></span>High
+            </label>
+            <label class="priority-option" data-priority="urgent">
+              <input type="radio" name="base-priority" value="urgent" />
+              <span class="priority-dot" aria-hidden="true"></span>Urgent
+            </label>
+          </div>
+        </fieldset>
+      </fieldset>
+
+      <!-- Instance Portion -->
+
+      <fieldset class="edit-fieldset" data-edit-panel="instance">    
+        <div class="field-row">
+          <fieldset class="field field-group schedule-fieldset"> 
+            <div class="schedule-group">
+              <label class="field">
+                <span class="field-label">Start Date</span>
+                <input type="date" name="instance-start-date" value="2026-09-15" />
+              </label>
+              <label class="field">
+                <span class="field-label">Start Time</span>
+                <input type="time" name="instance-start-time" value="11:00" />
+              </label>
+              <label class="field">
+                <span class="field-label">End Time</span>
+                <input type="time" name="instance-end-time" value="12:00" />
+              </label>
+              <label class="field">
+                <span class="field-label">End Date</span>
+                <input type="date" name="instance-end-date" value="2026-09-15" />
+              </label>
+            </div> 
+          </fieldset>
+        </div>
+        <label class="field">
+          <span class="field-label">Repeat</span>
+          <select name="instance-repeat">
+            <option value="none">Does not repeat</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="custom">Custom&hellip;</option>
+          </select>
+        </label>
+      </fieldset>
+      <div class="edit-panel-footer">
+        <button type="button" class="btn btn-ghost" data-close-dialog>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
 
 </div>
 </body>
 </html>
+

@@ -1,11 +1,9 @@
-// // import { testInputs } from 'app/development/testInput';
-// import { clearSavedData } from 'app/dataBase';
-// import { eventListeners } from 'app/ui/eventListener';
-// import { initializeProgram } from 'app/initialize';
-// import { update } from 'app/update';
+import { initModals } from 'app/ui/modal';
+import { initTaskEditModals } from 'app/ui/taskEditModal';
+import { initTaskViewModals } from 'app/ui/taskViewModal';
+import { initViewSwitcher } from 'app/ui/viewSwitcher';
 
-// clearSavedData();
-// initializeProgram();
-// eventListeners();
-
-// setInterval(update, 100);
+initModals();
+initTaskEditModals();
+initTaskViewModals();
+initViewSwitcher();

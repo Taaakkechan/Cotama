@@ -1,13 +1,15 @@
 // decided I don't need status for a calendar app
 //type Status = 'scheduled' | 'pending' | 'none';
 
+type Priority = "low" | "medium" | "high" | "Urgent";
+
 interface Task {
 	id: number
 	//default task title
 	title: string
 	description: string
 	duration: number
-	priority: number
+	priority: Priority
 	occurrences: TaskOccurrence[]
 	completed?: TaskOccurrence[]
 }
