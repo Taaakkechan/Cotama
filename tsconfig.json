@@ -8,6 +8,7 @@
     "noUnusedLocals": true,
     "outDir": "./tsc/",
     "strictNullChecks": true,
-    "target": "ES2019"
+    "target": "ES2019",
+    "skipLibCheck": true
   }
 }

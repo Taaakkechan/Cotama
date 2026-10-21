@@ -47,13 +47,13 @@ export function initTaskViewModals(): void {
   });
 
   requireQuery('[data-action="edit-instance"]').addEventListener("click", () => {
-    openEditModal({ mode: "instance" });
+    openEditModal("edit-instance");
   });
   requireQuery('[data-action="edit-base-task"]').addEventListener("click", () => {
-    openEditModal({ mode: "base-task" });
+    openEditModal("edit-base-task");
   });
   requireQuery('[data-action="new-instance"]').addEventListener("click", () => {
-    openEditModal({ mode: "instance", isNew: true });
+    openEditModal("new-instance");
   });
   requireQuery('[data-action="delete-instance"]').addEventListener("click", () => {
     console.log("TODO: delete instance", viewOverlay.dataset.instanceId);
