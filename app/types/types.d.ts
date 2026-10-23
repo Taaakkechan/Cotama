@@ -18,13 +18,13 @@ interface TaskOccurrence {
 	id: string;
 	start: number;
 	due: number;
-	repeat: RepeatingItem;
+	repeat: Repeat | null
 	//doing dependancies is complicated is should be a project for another time
 }
 
-interface Repeat {
-	freq: number;
-	end?: number;
+interface Repeat { 
+	interval: numebr; 
+	until?: number ;
 }
 
 interface ScheduledTask {

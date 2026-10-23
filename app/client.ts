@@ -4,6 +4,7 @@ import { initTaskViewModals } from 'app/ui/taskViewModal';
 import { initViewSwitcher } from 'app/ui/viewSwitcher';
 import { initHeader } from 'app/ui/header';
 
+
 initModals();
 initTaskEditModals();
 initTaskViewModals();

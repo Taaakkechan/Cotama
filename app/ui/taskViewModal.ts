@@ -6,8 +6,8 @@ import { onChange } from 'app/store';
 import { modalDisplay } from 'app/ui/modal';
 import { openEditModal } from 'app/ui/taskEditModal';
 
-// the view overlay window
-const viewOverlay = requireElementById<dialog>("task-view-dialog");
+// the view window
+const viewWindow = requireElementById<dialog>("task-view-dialog");
 
 // fields of the task that will be populated
 const instanceScheduleEl = requireElementById("view-instance-schedule");
@@ -16,6 +16,16 @@ const baseDescriptionEl = requireElementById("view-base-description");
 const baseDurationEl = requireElementById("view-base-duration");
 const basePriorityEl = requireElementById("view-base-priority");
 const priorityLabel = requireQuery(".priority-label", basePriorityEl);
+
+const eventChips = queryAll(".event-chip");
+
+// buttons
+const newTaskBtn = requireElementById("new-task-btn");
+const editBaseTaskBtn = requireQuery('[data-action="edit-base-task"]');
+const newInstanceBtn = requireQuery('[data-action="new-instance"]');
+const editInstanceBtn = requireQuery('[data-action="edit-instance"]');
+const deleteBaseTaskBtn = requireQuery('[data-action="delete-base-task"]');
+const deleteInstanceBtn = requireQuery('[data-action="delete-instance"]');
 
 
 // stores the key to the scheduled task value.
@@ -45,47 +55,61 @@ function renderViewModal(): boolean {
   return true;            // render successful
 }
 
+onChange(() => {
+  if (!viewWindow.open) { return; } // nothing to refresh while closed
+  if (!renderViewModal()) { modalDisplay(viewWindow, false); } // the item vanished while open
+});
 
 // =====================
 // Public
 // =====================
 
+// need this function for udpating the key after editing the task (start time, occurrenceId)
+export function setViewingKey(key: ScheduledTaskKey): void {
+  viewingKey = key;          // only sets the key, no render
+}
 
 export function openViewModal(key: ScheduledTaskKey): void {
-  viewingKey = key;
+  setViewingKey(key);
   if (!renderViewModal()) {
     viewingKey = null;
-    modalDisplay(viewOverlay, false);
+    modalDisplay(viewWindow, false);
   }
-  modalDisplay(viewOverlay, true);
+  modalDisplay(viewWindow, true);
 }
 
 export function initTaskViewModals(): void {
-  queryAll(".event-chip").forEach((chip) => {
+
+  eventChips.forEach((chip) => {
+    // TODO: extract data from chip to key?
     chip.addEventListener("click", () => openViewModal(chip));
   });
+  newTaskBtn.addEventListener("click", () => {
+    openEditModal({ mode:"new-task" });
+  });
 
-  requireQuery('[data-action="edit-base-task"]').addEventListener("click", () => {
+  editBaseTaskBtn.addEventListener("click", () => {
     if (viewingKey) { openEditModal({ mode: "edit-base-task",  taskId: veiwingKey.taskId }); }
     else { console.log("SheduledTaskKey not found.") }
   });
-  requireQuery('[data-action="new-instance"]').addEventListener("click", () => {
+  newInstanceBtn.addEventListener("click", () => {
     if (viewingKey) { openEditModal({ mode: "new-instance",  taskId: veiwingKey.taskId }); }
     else { console.log("SheduledTaskKey not found.") }
   });
-  requireQuery('[data-action="edit-instance"]').addEventListener("click", () => {
+  editInstanceBtn.addEventListener("click", () => {
     if (viewingKey) { openEditModal({ mode: "edit-instance",  taskId: veiwingKey.taskId, occurrenceId: veiwingKey.occurrenceId }); }
     else { console.log("SheduledTaskKey not found.") }
   });
 
-  requireQuery('[data-action="delete-instance"]').addEventListener("click", () => {
-    console.log("TODO: delete instance", viewOverlay.dataset.instanceId);
-    modalDisplay(viewOverlay, false);
+  deleteBaseTaskBtn.addEventListener("click", () => {
+    console.log("TODO: delete base task", viewWindow.dataset.taskId);
+    modalDisplay(viewWindow, false);
   });
-  requireQuery('[data-action="delete-base-task"]').addEventListener("click", () => {
-    console.log("TODO: delete base task", viewOverlay.dataset.taskId);
-    modalDisplay(viewOverlay, false);
+  deleteInstanceBtn.addEventListener("click", () => {
+    console.log("TODO: delete instance", viewWindow.dataset.instanceId);
+    modalDisplay(viewWindow, false);
   });
+ 
 
-  viewOverlay.addEventListener("close", () => { viewingKey = null; });
+  viewWindow.addEventListener("close", () => { viewingKey = null; });
 }

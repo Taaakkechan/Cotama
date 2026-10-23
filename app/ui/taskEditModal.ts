@@ -61,6 +61,7 @@ function setFormMode(mode: EditMode): void {
   });
 }
 
+
 // ========================
 // Public
 // ========================
@@ -81,7 +82,7 @@ export function initTaskEditModals(): void {
   });
   
   // Forms don't actually submit anywhere yet — just close on "Save".
-  form.addEventListener("submit", (e) => {
+  editForm.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!editingContext) return;
 
