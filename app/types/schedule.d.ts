@@ -1,6 +1,0 @@
-interface Schedule {
-	tasks: ScheduledTask[]
-}
-
-
-

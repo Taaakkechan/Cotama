@@ -10,6 +10,8 @@ export function modalDisplay(dialog: HTMLDialogElement, display: boolean): void 
 }
 
 export function initModals(): void {
+
+  // these "close" don't use the modalDisplay() that we defined. Maybe worth fixing later
   // close buttons
   queryAll("[data-close-dialog]").forEach((btn) => {
     btn.addEventListener("click", () => btn.closest("dialog")?.close());
